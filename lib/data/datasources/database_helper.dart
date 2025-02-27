@@ -7,16 +7,27 @@ class DatabaseHelper {
 
   DatabaseHelper._internal();
 
-  final Box<TransactionModel> _transactionBox = Hive.box<TransactionModel>('transactions');
+  late Box<TransactionModel> _transactionBox;
+
+  Future<void> init() async {
+    _transactionBox = await Hive.openBox<TransactionModel>('transactions');
+  }
 
   // Create
   Future<void> insertTransaction(TransactionModel transaction) async {
     await _transactionBox.add(transaction);
   }
 
-  // Read
-  List<TransactionModel> getTransactions() {
-    return _transactionBox.values.toList();
+  // Read with pagination
+  List<TransactionModel> getTransactions({int offset = 0, int limit = 5}) {
+    return _transactionBox.values.skip(offset).take(limit).toList();
+  }
+
+  // Read all transactions for the current month
+  List<TransactionModel> getCurrentMonthTransactions() {
+    final now = DateTime.now();
+    return _transactionBox.values.where((transaction) =>
+        transaction.date.year == now.year && transaction.date.month == now.month).toList();
   }
 
   // Update

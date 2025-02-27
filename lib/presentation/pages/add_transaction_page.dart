@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class AddTransactionPage extends StatelessWidget {
-  final TextEditingController _descriptionController = TextEditingController(text: 'Test');
-  final TextEditingController _amountController = TextEditingController(text: '100.00');
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _amountController = TextEditingController();
   final TextEditingController _dateController = TextEditingController(text: DateFormat('dd/MM/yyyy').format(DateTime.now()));
-  final TextEditingController _typeController = TextEditingController(text: 'Receita');
+  final TextEditingController _typeController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
@@ -73,16 +73,15 @@ class AddTransactionPage extends StatelessWidget {
                 ),
                 SizedBox(height: 16.0),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      final transaction = TransactionModel()
-                        ..id = DateTime.now().millisecondsSinceEpoch // Gerar um ID único
-                        ..description = _descriptionController.text
-                        ..amount = double.parse(_amountController.text)
-                        ..date = DateFormat('dd/MM/yyyy').parseStrict(_dateController.text)
-                        ..type = _typeController.text;
+                      final transaction = TransactionModel(
+                        description: _descriptionController.text,
+                        amount: double.parse(_amountController.text),
+                        date: DateFormat('dd/MM/yyyy').parseStrict(_dateController.text),
+                      );
 
-                      DatabaseHelper().insertTransaction(transaction);
+                      await DatabaseHelper().insertTransaction(transaction);
                       Navigator.pop(context, true); // Retornar true para indicar que a transação foi adicionada
                     }
                   },
